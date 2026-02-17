@@ -1,0 +1,8 @@
+.env
+venv/
+*.log
+nohup.out
+__pycache__/
+*.tar.gz
+aws/
+awscliv2.zip
