@@ -7,7 +7,30 @@ A production-grade automation suite designed to ensure high availability and dat
 
 ## 🏗️ Architecture
 
-[Image of automated server monitoring and backup architecture diagram]
+```mermaid
+graph TD
+    subgraph Linux Server
+        Cron[⏱️ Crontab Daemon]
+        Python[🐍 Monitor.py]
+        Bash[📜 Backup.sh]
+        Files[📂 Local Project Files]
+    end
+
+    Internet((🌐 Websites/APIs))
+    Discord[📢 Discord Webhook]
+    AWS[☁️ AWS S3 Bucket]
+
+    %% Monitoring Flow
+    Cron -- "Every 5 mins" --> Python
+    Python -- "1. Ping HTTP" --> Internet
+    Internet -- "2. Return Status" --> Python
+    Python -- "3. If Down (Alert)" --> Discord
+
+    %% Backup Flow
+    Cron -- "At Midnight (00:00)" --> Bash
+    Bash -- "1. Compress Files" --> Files
+    Files -- "2. Upload .tar.gz" --> AWS
+```
 
 The system consists of two autonomous daemons:
 1.  **The Watchdog (Python):** Monitors HTTP endpoints every 5 minutes. If a service (e.g., website, API) goes down, it triggers an instant alert to a Discord channel via Webhook.
