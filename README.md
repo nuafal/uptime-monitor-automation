@@ -10,28 +10,24 @@ A production-grade, containerized automation suite designed to ensure high avail
 
 ```mermaid
 graph TD
-    %% 1. CI/CD Pipeline (Deployment)
+    %% 1. CI/CD Pipeline
     subgraph Pipeline [DevOps Pipeline]
         Dev[💻 You] -->|Git Push| GitHub[🐙 GitHub Repo]
         GitHub -->|Trigger| Actions[⚙️ GitHub Actions]
         Actions -->|Build & Push Image| DockerHub[🐳 Docker Hub]
     end
 
-    %% 2. Core Server & Container
-    subgraph Production [Production Server - Linux/WSL]
+    %% 2. Core Server Components
+    subgraph Production [Production Server - WSL/Linux]
         DockerHub -.->|docker compose pull| Compose[📦 Docker Compose]
-        
-        subgraph ContainerApp [Container: uptime-monitor]
-            Node[🟢 Node.js Watchdog]
-            DB[(config/history.json)]
-            UI[📊 src/dashboard.html]
-        end
-        
+        Node[🟢 Node.js Watchdog]
+        DB[💾 config/history.json]
+        UI[📊 src/dashboard.html]
         Cron[⏱️ Linux Cron]
         Backup[📜 scripts/backup.sh]
     end
 
-    %% 3. External Services & Access
+    %% 3. External Services
     Internet((🌐 Target Websites))
     Discord[📢 Discord Webhook]
     AWS[☁️ AWS S3 Bucket]
@@ -40,43 +36,47 @@ graph TD
 
     %% --- Logic Flow Connections ---
     
-    %% Setup
-    Compose --> Node
+    Compose -->|Starts| Node
     
     %% Monitoring Loop
-    Node -- "1. Ping HTTP" --> Internet
-    Node -- "2. Save Data" --> DB
-    Node -- "3. Generate Chart" --> UI
-    Node -- "4. Send Alert If Down" --> Discord
+    Node -->|1. Ping HTTP| Internet
+    Node -->|2. Save Data| DB
+    Node -->|3. Generate Chart| UI
+    Node -->|4. Send Alert If Down| Discord
     
     %% Backup Loop
-    Cron -- "Nightly Trigger" --> Backup
-    Backup -- "Zip Config & Src" --> AWS
+    Cron -->|Nightly Trigger| Backup
+    Backup -->|Zip Config & Src| AWS
 
     %% Viewing
-    Tunnel -- "Forward Port 9090" --> UI
-    PublicViewer -- "Secure HTTPS" --> Tunnel
+    Tunnel -->|Forward Port 9090| UI
+    PublicViewer -->|Secure HTTPS| Tunnel
 ```
 
-The system consists of two autonomous daemons:
-1.  **The Watchdog (Python):** Monitors HTTP endpoints every 5 minutes. If a service (e.g., website, API) goes down, it triggers an instant alert to a Discord channel via Webhook.
-2.  **The Safety Net (Bash):** Runs nightly at 00:00. It compresses critical project files and uploads them securely to an AWS S3 bucket for disaster recovery.
+The system consists of three core components:
+1. **The Watchdog (Node.js & Docker):** A containerized daemon that monitors HTTP endpoints continuously. It records latency metrics, dynamically generates a web dashboard, and triggers instant alerts to a Discord channel via Webhook if a service goes down.
+2. **The Observability UI (Chart.js & Ngrok):** A responsive, dark-mode enabled HTML dashboard that visualizes server health and latency trends in real-time, exposed securely to the public internet via an Ngrok reverse-proxy tunnel.
+3. **The Safety Net (Bash & AWS S3):** A scheduled Linux cron job that runs nightly at 00:00 to compress critical project files and configurations, uploading them securely to an AWS S3 bucket for disaster recovery.
 
 ## 🚀 Features
 
-* **Real-Time Downtime Alerts:** Immediate notification to mobile/desktop via Discord.
-* **Automated Disaster Recovery (DR):** "Set and forget" backups to the Cloud.
-* **Secure Configuration:** Uses `.env` environment variables to protect API keys and credentials.
-* **Self-Healing:** Runs as a background daemon using Linux Crontab.
-* **Cloud Integration:** Native integration with AWS CLI v2 for S3 storage.
+* **Interactive Live Dashboard:** Real-time latency tracking with Chart.js, featuring a dynamic Dark/Light mode toggle and system health metrics (RAM/Uptime).
+* **Containerized & Portable:** Fully containerized using Docker and orchestrated with Docker Compose for guaranteed consistency across any Linux environment.
+* **Global Access Tunneling:** Bypasses local firewalls to provide a secure, permanent public URL for remote monitoring via Ngrok.
+* **Real-Time Downtime Alerts:** Immediate notifications to mobile/desktop via Discord Webhooks.
+* **Automated Disaster Recovery (DR):** "Set and forget" nightly `.tar.gz` backups to the Cloud.
+* **Continuous Integration (CI/CD):** Automated Docker image builds pushed to Docker Hub via GitHub Actions upon every repository commit.
 
 ## 🛠️ Tech Stack
 
-* **Scripting:** Python 3 (Requests), Bash Shell
-* **Cloud:** AWS S3 (Simple Storage Service)
-* **Automation:** Linux Crontab (Cron)
+* **Backend Scripting:** Node.js (Axios, fs), Bash Shell
+* **Frontend UI:** HTML5, CSS3, Chart.js
+* **Containerization:** Docker, Docker Compose
+* **CI/CD Pipeline:** GitHub Actions, Docker Hub
+* **Cloud & DR:** AWS S3 (Simple Storage Service), AWS CLI v2
+* **Networking:** Ngrok (Reverse Proxy Tunneling)
 * **Notifications:** Discord Webhooks
-* **Security:** Python-dotenv
+* **Security:** `dotenv` for strict environment variable management
 
 ## ⚙️ Setup & Installation
 
