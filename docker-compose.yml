@@ -6,6 +6,8 @@ services:
     container_name: my-monitor
     ports:
       - "9090:8080"
+    env_file:
+      - .env
     volumes:
       - ./config:/app/config
       - ./src:/app/src
