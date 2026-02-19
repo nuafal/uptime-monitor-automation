@@ -59,7 +59,7 @@ graph TD
 ```
 
 The system consists of two autonomous daemons:
-1.  **The Watchdog (Python):** Monitors HTTP endpoints every 5 minutes. If a service (e.g., website, API) goes down, it triggers an instant alert to a Discord channel via Webhook.
+1.  **The Watchdog (Javascript):** Monitors HTTP endpoints every 5 minutes. If a service (e.g., website, API) goes down, it triggers an instant alert to a Discord channel via Webhook.
 2.  **The Safety Net (Bash):** Runs nightly at 00:00. It compresses critical project files and uploads them securely to an AWS S3 bucket for disaster recovery.
 
 ## 🚀 Features
