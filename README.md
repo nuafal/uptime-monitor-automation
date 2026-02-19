@@ -1,35 +1,61 @@
-# 🛡️ Automated Server Monitoring & Disaster Recovery
+# 🛡️ Automated Server Monitoring & DObservability Dashboard
 
-A production-grade automation suite designed to ensure high availability and data integrity for Linux servers. This project implements **Real-Time Observability** via Discord and **Automated Off-Site Backups** using AWS S3.
+A production-grade, containerized automation suite designed to ensure high availability for web services. This project evolved from a simple Python watchdog into a **Full-Stack Observability Dashboard** with Docker orchestration, CI/CD pipelines, and global tunneling.
 
 ![Status](https://img.shields.io/badge/Status-Production-green)
-![Tech](https://img.shields.io/badge/Stack-Python_|_Bash_|_AWS-blue)
+![Tech](https://img.shields.io/badge/Stack-Node.js_|_Docker_|_Chart.js-blue)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=github-actions&logoColor=white)
 
 ## 🏗️ Architecture
 
 ```mermaid
 graph TD
-    subgraph Linux Server
-        Cron[⏱️ Crontab Daemon]
-        Python[🐍 Monitor.py]
-        Bash[📜 Backup.sh]
-        Files[📂 Local Project Files]
+    %% 1. CI/CD Pipeline (Deployment)
+    subgraph DevOps Pipeline
+        Dev[💻 You] -->|Git Push| GitHub[🐙 GitHub Repo]
+        GitHub -->|Trigger| Actions[⚙️ GitHub Actions]
+        Actions -->|Build & Push Image| DockerHub[🐳 Docker Hub]
     end
 
-    Internet((🌐 Websites/APIs))
+    %% 2. Core Server & Container
+    subgraph Production Server (Linux/WSL)
+        DockerHub -.->|docker compose pull| Compose[📦 Docker Compose]
+        
+        subgraph Container: uptime-monitor
+            Node[🟢 Node.js Watchdog]
+            DB[(config/history.json)]
+            UI[📊 src/dashboard.html]
+        end
+        
+        Cron[⏱️ Linux Cron]
+        Backup[📜 scripts/backup.sh]
+    end
+
+    %% 3. External Services & Access
+    Internet((🌐 Target Websites))
     Discord[📢 Discord Webhook]
     AWS[☁️ AWS S3 Bucket]
+    Tunnel[🥷 Ngrok Tunnel]
+    PublicViewer[📱 Remote Access]
 
-    %% Monitoring Flow
-    Cron -- "Every 5 mins" --> Python
-    Python -- "1. Ping HTTP" --> Internet
-    Internet -- "2. Return Status" --> Python
-    Python -- "3. If Down (Alert)" --> Discord
+    %% --- Logic Flow Connections ---
+    
+    %% Setup
+    Compose --> Node
+    
+    %% Monitoring Loop
+    Node -- "1. Ping HTTP" --> Internet
+    Node -- "2. Save Data" --> DB
+    Node -- "3. Generate Chart" --> UI
+    Node -- "4. Send Alert (If Down)" --> Discord
+    
+    %% Backup Loop
+    Cron -- "Nightly Trigger" --> Backup
+    Backup -- "Zip Config & Src" --> AWS
 
-    %% Backup Flow
-    Cron -- "At Midnight (00:00)" --> Bash
-    Bash -- "1. Compress Files" --> Files
-    Files -- "2. Upload .tar.gz" --> AWS
+    %% Viewing
+    Tunnel -- "Forward Port 9090" --> UI
+    PublicViewer -- "Secure HTTPS" --> Tunnel
 ```
 
 The system consists of two autonomous daemons:
