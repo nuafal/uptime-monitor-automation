@@ -6,6 +6,8 @@ A production-grade, containerized automation suite designed to ensure high avail
 ![Tech](https://img.shields.io/badge/Stack-Node.js_|_Docker_|_Chart.js-blue)
 ![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=github-actions&logoColor=white)
 
+<img width="954" height="865" alt="image" src="https://github.com/user-attachments/assets/209498bc-97b5-458c-9ac6-3c39117b2d4b" />
+
 ## 🏗️ Architecture
 
 ```mermaid
