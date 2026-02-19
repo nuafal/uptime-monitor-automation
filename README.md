@@ -11,17 +11,17 @@ A production-grade, containerized automation suite designed to ensure high avail
 ```mermaid
 graph TD
     %% 1. CI/CD Pipeline (Deployment)
-    subgraph DevOps Pipeline
+    subgraph Pipeline [DevOps Pipeline]
         Dev[💻 You] -->|Git Push| GitHub[🐙 GitHub Repo]
         GitHub -->|Trigger| Actions[⚙️ GitHub Actions]
         Actions -->|Build & Push Image| DockerHub[🐳 Docker Hub]
     end
 
     %% 2. Core Server & Container
-    subgraph Production Server (Linux/WSL)
+    subgraph Production [Production Server - Linux/WSL]
         DockerHub -.->|docker compose pull| Compose[📦 Docker Compose]
         
-        subgraph Container: uptime-monitor
+        subgraph ContainerApp [Container: uptime-monitor]
             Node[🟢 Node.js Watchdog]
             DB[(config/history.json)]
             UI[📊 src/dashboard.html]
@@ -47,7 +47,7 @@ graph TD
     Node -- "1. Ping HTTP" --> Internet
     Node -- "2. Save Data" --> DB
     Node -- "3. Generate Chart" --> UI
-    Node -- "4. Send Alert (If Down)" --> Discord
+    Node -- "4. Send Alert If Down" --> Discord
     
     %% Backup Loop
     Cron -- "Nightly Trigger" --> Backup
