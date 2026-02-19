@@ -1,0 +1,137 @@
+
+    <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Uptime Dashboard</title>
+            <meta http-equiv="refresh" content="30">
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <style>
+                :root {
+                    --bg-color: #f4f4f9; --card-bg: #ffffff; --text-color: #333333;
+                    --toggle-bg: #ccc; --toggle-active: #2196F3;
+                }
+                [data-theme="dark"] {
+                    --bg-color: #1a1a1a; --card-bg: #2d2d2d; --text-color: #ffffff;
+                    --toggle-bg: #666; --toggle-active: #2ecc71;
+                }
+                body { font-family: 'Segoe UI', sans-serif; padding: 20px; background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+                .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+                .card { background-color: var(--card-bg); padding: 20px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                
+                .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+                .switch input { opacity: 0; width: 0; height: 0; }
+                .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--toggle-bg); transition: .4s; border-radius: 34px; }
+                .slider:before { position: absolute; content: "☀️"; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; text-align: center; line-height: 26px; }
+                input:checked + .slider { background-color: var(--toggle-active); }
+                input:checked + .slider:before { transform: translateX(26px); content: "🌙"; }
+                
+                ul { list-style: none; padding: 0; }
+                li { padding: 10px 0; border-bottom: 1px solid rgba(128,128,128,0.1); display: flex; justify-content: space-between; }
+                a { color: #2196F3; text-decoration: none; font-weight: bold; }
+            </style>
+            <script>
+                // 💡 Apply theme immediately before page renders to prevent "White Flash"
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            </script>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🚀 System Status</h1>
+                <label class="switch">
+                    <input type="checkbox" id="theme-checkbox" onchange="toggleTheme()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px; color: var(--text-color); opacity: 0.8;">
+                <span>📅 Last Scan: <strong>2/19/2026, 1:46:23 AM</strong></span>
+                <span>⏰ Current Time: <strong id="live-clock">Loading...</strong></span>
+            </div>
+
+            <div class="card">
+                <h2>📈 Latency History (Seconds)</h2>
+                <div style="height: 300px;"><canvas id="latencyChart"></canvas></div>
+            </div>
+
+            <div class="card">
+                <h2>🖥️ Server Health</h2>
+                <p><strong>RAM Usage:</strong> 2.77 / 7.70 GB</p>
+                <p><strong>System Uptime:</strong> 0.90 Hours</p>
+            </div>
+
+            <div class="card">
+                <h2>🌐 Current Status</h2>
+                <ul>
+                    
+                        <li>
+                            <span>✅ <a href="https://google.com" target="_blank">https://google.com</a></span>
+                            <span style="font-family: monospace;">0.264s</span>
+                        </li>
+                    
+                        <li>
+                            <span>✅ <a href="https://github.com/nuafal" target="_blank">https://github.com/nuafal</a></span>
+                            <span style="font-family: monospace;">0.542s</span>
+                        </li>
+                    
+                        <li>
+                            <span>❌ <a href="https://this-site-does-not-exist-123.com" target="_blank">https://this-site-does-not-exist-123.com</a></span>
+                            <span style="font-family: monospace;">0.000s</span>
+                        </li>
+                    
+                </ul>
+            </div>
+
+            <script>
+                // Sync checkbox with the current theme
+                const checkbox = document.getElementById('theme-checkbox');
+                if (localStorage.getItem('theme') === 'dark') checkbox.checked = true;
+
+                function toggleTheme() {
+                    const newTheme = checkbox.checked ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    // Reloading ensures Chart.js colors also refresh
+                    location.reload(); 
+                }
+
+                function updateClock() {
+                    document.getElementById('live-clock').innerText = new Date().toLocaleTimeString();
+                }
+                setInterval(updateClock, 1000);
+                updateClock();
+
+                // --- CHART.JS LOGIC ---
+                const theme = localStorage.getItem('theme') || 'light';
+                const chartColor = theme === 'dark' ? '#ffffff' : '#333333';
+                const gridColor = theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+
+                const ctx = document.getElementById('latencyChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ["12:31 PM","12:32 PM","01:00 PM","01:02 PM","02:22 PM","Feb 19, 01:38 AM","Feb 19, 01:38 AM","Feb 19, 01:41 AM","Feb 19, 01:46 AM"],
+                        datasets: [{"label":"google.com","data":[0.218,0.252,0.503,0.215,0.352,0.216,0.45,0.26,0.264],"borderColor":"#2ecc71","backgroundColor":"#2ecc71","tension":0.4,"fill":false},{"label":"github.com/nuafal","data":[0,0.524,0.52,0.514,0.528,0.558,0.51,0.503,0.542],"borderColor":"#3498db","backgroundColor":"#3498db","tension":0.4,"fill":false},{"label":"this-site-does-not-exist-123.com","data":[0,0,0,0,0,0,0,0,0],"borderColor":"#9b59b6","backgroundColor":"#9b59b6","tension":0.4,"fill":false}]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { ticks: { color: chartColor }, grid: { color: gridColor } },
+                            y: { 
+                                beginAtZero: false, 
+                                ticks: { color: chartColor }, 
+                                grid: { color: gridColor },
+                                title: { display: true, text: 'Seconds', color: chartColor }
+                            }
+                        },
+                        plugins: {
+                            legend: { labels: { color: chartColor } },
+                            tooltip: { mode: 'index', intersect: false }
+                        }
+                    }
+                });
+            </script>
+        </body>
+        </html>

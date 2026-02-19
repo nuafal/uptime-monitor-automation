@@ -1,0 +1,12 @@
+{
+  "name": "uptime-monitor",
+  "version": "1.0.0",
+  "main": "src/monitor.js",
+  "scripts": {
+    "start": "node src/monitor.js"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "dotenv": "^16.3.1"
+  }
+}
