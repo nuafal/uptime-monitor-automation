@@ -10,28 +10,24 @@ A production-grade, containerized automation suite designed to ensure high avail
 
 ```mermaid
 graph TD
-    %% 1. CI/CD Pipeline (Deployment)
+    %% 1. CI/CD Pipeline
     subgraph Pipeline [DevOps Pipeline]
         Dev[💻 You] -->|Git Push| GitHub[🐙 GitHub Repo]
         GitHub -->|Trigger| Actions[⚙️ GitHub Actions]
         Actions -->|Build & Push Image| DockerHub[🐳 Docker Hub]
     end
 
-    %% 2. Core Server & Container
-    subgraph Production [Production Server - Linux/WSL]
+    %% 2. Core Server Components
+    subgraph Production [Production Server - WSL/Linux]
         DockerHub -.->|docker compose pull| Compose[📦 Docker Compose]
-        
-        subgraph ContainerApp [Container: uptime-monitor]
-            Node[🟢 Node.js Watchdog]
-            DB[(config/history.json)]
-            UI[📊 src/dashboard.html]
-        end
-        
+        Node[🟢 Node.js Watchdog]
+        DB[💾 config/history.json]
+        UI[📊 src/dashboard.html]
         Cron[⏱️ Linux Cron]
         Backup[📜 scripts/backup.sh]
     end
 
-    %% 3. External Services & Access
+    %% 3. External Services
     Internet((🌐 Target Websites))
     Discord[📢 Discord Webhook]
     AWS[☁️ AWS S3 Bucket]
@@ -40,22 +36,21 @@ graph TD
 
     %% --- Logic Flow Connections ---
     
-    %% Setup
-    Compose --> Node
+    Compose -->|Starts| Node
     
     %% Monitoring Loop
-    Node -- "1. Ping HTTP" --> Internet
-    Node -- "2. Save Data" --> DB
-    Node -- "3. Generate Chart" --> UI
-    Node -- "4. Send Alert If Down" --> Discord
+    Node -->|1. Ping HTTP| Internet
+    Node -->|2. Save Data| DB
+    Node -->|3. Generate Chart| UI
+    Node -->|4. Send Alert If Down| Discord
     
     %% Backup Loop
-    Cron -- "Nightly Trigger" --> Backup
-    Backup -- "Zip Config & Src" --> AWS
+    Cron -->|Nightly Trigger| Backup
+    Backup -->|Zip Config & Src| AWS
 
     %% Viewing
-    Tunnel -- "Forward Port 9090" --> UI
-    PublicViewer -- "Secure HTTPS" --> Tunnel
+    Tunnel -->|Forward Port 9090| UI
+    PublicViewer -->|Secure HTTPS| Tunnel
 ```
 
 The system consists of three core components:
